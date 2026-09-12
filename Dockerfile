@@ -1,14 +1,15 @@
 FROM python:3.11-slim
 WORKDIR /app
 
-# تثبيت المتطلبات
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# انسخ التطبيق
+# Copy application
 COPY . .
 
-# متغيرات بيئية آمنة تفضل وضعها عبر GitHub Secrets أو ENV عند التشغيل
+# Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=utf-8
 
 CMD ["python", "bot.py"]
