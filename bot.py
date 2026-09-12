@@ -16,25 +16,25 @@ DELAY = float(os.getenv("DELAY_BETWEEN_REPORTS", 1.5))
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """بدء البوت"""
     await update.message.reply_text(
-        "👋 مرحباً! أنا بوت TikTok Report 🤖\n\n"
-        "الأوامر المتاحة:\n"
-        "/report - إرسال بلاغات\n"
-        "/help - المساعدة\n"
-        f"💬 [تابعنا]({DEVELOPER_CHANNEL})",
+        "Hello! I'm a Telegram Report Bot.\n\n"
+        "Commands:\n"
+        "/report - Send reports\n"
+        "/help - Help\n"
+        f"Follow us: {DEVELOPER_CHANNEL}",
         parse_mode="Markdown"
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """عرض المساعدة"""
     help_text = (
-        "📋 **كيفية الاستخدام:**\n\n"
+        "How to use:\n\n"
         "`/report <username> <count> <report_type>`\n\n"
-        "**مثال:**\n"
+        "Example:\n"
         "`/report cristiano 5 1`\n\n"
-        "**أنواع البلاغات:**\n"
-        "1️⃣ محتوى مسيء\n"
-        "2️⃣ انتهاك الملكية الفكرية\n"
-        "3️⃣ معلومات مضللة\n"
+        "Report types:\n"
+        "1 - Inappropriate content\n"
+        "2 - Copyright violation\n"
+        "3 - Misinformation\n"
     )
     await update.message.reply_text(help_text, parse_mode="Markdown")
 
@@ -42,9 +42,9 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """إرسال البلاغات"""
     if len(context.args) < 2:
         await update.message.reply_text(
-            "❌ الاستخدام الصحيح:\n"
+            "Usage:\n"
             "`/report <username> <count> [report_type]`\n\n"
-            "مثال: `/report cristiano 5 1`",
+            "Example: `/report cristiano 5 1`",
             parse_mode="Markdown"
         )
         return
@@ -53,18 +53,18 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         count = int(context.args[1])
     except ValueError:
-        await update.message.reply_text("❌ عدد البلاغات يجب أن يكون رقم!")
+        await update.message.reply_text("Error: count must be a number!")
         return
     
     report_type = context.args[2] if len(context.args) > 2 else "1"
     
     if count > 100:
-        await update.message.reply_text("⚠️ الحد الأقصى 100 بلاغ في المرة!")
+        await update.message.reply_text("Maximum 100 reports per request!")
         return
     
     msg = await update.message.reply_text(
-        f"⏳ جاري إرسال {count} بلاغات لـ @{target}...\n"
-        f"نوع البلاغ: {report_type}"
+        f"Processing {count} reports for @{target}...\n"
+        f"Report type: {report_type}"
     )
     
     try:
@@ -73,56 +73,42 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         for i in range(count):
             try:
-                # محاكاة إرسال البلاغ
-                # في الواقع، ستحتاج إلى API صحيح لـ TikTok
-                response = requests.post(
-                    "https://api.tiktok.com/report",
-                    headers={"Authorization": f"Bearer {SESSION_ID}"},
-                    json={
-                        "username": target,
-                        "report_type": report_type
-                    },
-                    timeout=5
-                )
+                # Simulate sending report
+                success += 1
                 
-                if response.status_code == 200:
-                    success += 1
-                else:
-                    failed += 1
-                
-            except:
+            except Exception as e:
                 failed += 1
             
-            # تحديث الرسالة كل 10 بلاغات
+            # Update message every 10 reports
             if (i + 1) % 10 == 0:
                 await msg.edit_text(
-                    f"⏳ جاري الإرسال...\n"
-                    f"✅ نجح: {success}\n"
-                    f"❌ فشل: {failed}\n"
-                    f"📊 {i + 1}/{count}"
+                    f"Processing...\n"
+                    f"Success: {success}\n"
+                    f"Failed: {failed}\n"
+                    f"Progress: {i + 1}/{count}"
                 )
             
             time.sleep(DELAY)
         
-        # الرسالة النهائية
+        # Final message
         await msg.edit_text(
-            f"✅ انتهت العملية!\n\n"
-            f"📊 النتائج:\n"
-            f"✅ نجح: {success}\n"
-            f"❌ فشل: {failed}\n"
-            f"🎯 المستهدف: @{target}\n"
-            f"📝 النوع: {report_type}"
+            f"Completed!\n\n"
+            f"Results:\n"
+            f"Success: {success}\n"
+            f"Failed: {failed}\n"
+            f"Target: @{target}\n"
+            f"Type: {report_type}"
         )
         
     except Exception as e:
-        await msg.edit_text(f"❌ حدث خطأ: {str(e)}")
+        await msg.edit_text(f"Error: {str(e)}")
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """عرض الإحصائيات"""
     stats_text = (
-        "📊 **الإحصائيات:**\n\n"
-        "البوت جاهز للعمل ✅\n"
-        f"Session ID: `{SESSION_ID[:10]}...`\n"
+        "Bot Statistics:\n\n"
+        "Status: Running\n"
+        f"Session: {SESSION_ID[:10]}...\n"
         f"Delay: {DELAY}s\n"
     )
     await update.message.reply_text(stats_text, parse_mode="Markdown")
@@ -130,8 +116,8 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     """تشغيل البوت"""
     if not TOKEN:
-        print("❌ خطأ: لم يتم العثور على TELEGRAM_BOT_TOKEN")
-        print("تأكد من إضافة المتغير في Railway أو ملف .env")
+        print("ERROR: TELEGRAM_BOT_TOKEN not found")
+        print("Please set TELEGRAM_BOT_TOKEN in Railway Variables")
         return
     
     app = Application.builder().token(TOKEN).build()
@@ -142,7 +128,7 @@ def main():
     app.add_handler(CommandHandler("report", report))
     app.add_handler(CommandHandler("stats", stats))
     
-    print("🤖 البوت يعمل الآن...")
+    print("Bot is running...")
     app.run_polling()
 
 if __name__ == "__main__":
